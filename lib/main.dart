@@ -137,10 +137,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    addGenericUrlImage(
-        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpixel-creation.com%2Fwp-content%2Fuploads%2F113-kurumi-tokisaki-hd-wallpapers-background-images-wallpaper-abyss-1-800x800.png&f=1&nofb=1&ipt=e68e232772b16fa8629906a6a411d1276f4a3424cf5c6cf945e85056795b959f&ipo=images");
-    addGenericUrlImage(
-        "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.redd.it%2Fh6cxvyo43a841.png&f=1&nofb=1&ipt=51d0c5a0d8857fd381f13f8dfce77f51f2d45a412f2f0499044644753bdb9365&ipo=images");
+    //default images
+    //   addGenericUrlImage(
+    //       "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpixel-creation.com%2Fwp-content%2Fuploads%2F113-kurumi-tokisaki-hd-wallpapers-background-images-wallpaper-abyss-1-800x800.png&f=1&nofb=1&ipt=e68e232772b16fa8629906a6a411d1276f4a3424cf5c6cf945e85056795b959f&ipo=images");
+    //   addGenericUrlImage(
+    //       "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.redd.it%2Fh6cxvyo43a841.png&f=1&nofb=1&ipt=51d0c5a0d8857fd381f13f8dfce77f51f2d45a412f2f0499044644753bdb9365&ipo=images");
   }
 
   void removeElementFromMap(int id) {
@@ -189,10 +190,19 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        alignment: AlignmentDirectional.topStart,
-        children: getMainWidgets(),
-      ),
+      body: idList.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text("Please use the gear button to add images/text.")
+                ],
+              ),
+            )
+          : Stack(
+              alignment: AlignmentDirectional.topStart,
+              children: getMainWidgets(),
+            ),
       floatingActionButton: FloatingActionButton(
           onPressed: () => generalAddPopup(
                 addGenericUrlImage,
