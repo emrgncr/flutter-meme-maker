@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:meme_maker/add_popup_general.dart';
 
 class PopupUrlImage extends StatefulWidget {
   const PopupUrlImage({super.key, required this.onClick});
@@ -29,10 +29,10 @@ class _PopupUrlImageState extends State<PopupUrlImage> {
               TextField(
                 controller: _controller,
               ),
-              Padding(padding: EdgeInsets.symmetric(vertical: 4)),
+              padding,
               ElevatedButton(
                   onPressed: () => widget.onClick(_controller.text),
-                  child: Text("add")),
+                  child: const Text("add")),
             ],
           ),
         ));

@@ -50,7 +50,6 @@ class MutablePair<F, S> extends Pair {
 
   @override
   String toString() {
-    // TODO: implement toString
-    return super.toString();
+    return "mutable: ${super.toString()}";
   }
 }

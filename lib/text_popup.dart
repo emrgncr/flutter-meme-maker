@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:meme_maker/add_popup_general.dart';
 import 'package:widget_to_image/widget_to_image.dart';
 
 class PopupTextImage extends StatefulWidget {
@@ -30,21 +29,21 @@ class _PopupTextImageState extends State<PopupTextImage> {
         child: Center(
           child: Column(
             children: [
-              Text("Text:"),
+              const Text("Text:"),
               TextField(
                 controller: _controller,
               ),
-              Padding(padding: EdgeInsets.symmetric(vertical: 4)),
-              Text("Text size:"),
+              padding,
+              const Text("Text size:"),
               TextField(
                 controller: _sizeController,
                 keyboardType: TextInputType.number,
               ),
-              Padding(padding: EdgeInsets.symmetric(vertical: 4)),
+              padding,
               ElevatedButton(
                   onPressed: () =>
                       widget.onClick(_controller.text, _sizeController.text),
-                  child: Text("add")),
+                  child: const Text("add")),
             ],
           ),
         ));
@@ -65,30 +64,30 @@ Future<T?> showPopupText<T>(
         title: const Text("Add text as image"),
         children: [
           PopupTextImage(onClick: (s, n) {
+            double fontsize = double.tryParse(n) ?? 200;
+            double shadowsize = 1.5 * fontsize / 64;
             WidgetToImage.widgetToImage(Text(
               s,
               textDirection: TextDirection.ltr,
-              style: TextStyle(
-                  fontSize: double.tryParse(n) ?? 64,
-                  color: Colors.white,
-                  shadows: const [
-                    Shadow(
-                        // bottomLeft
-                        offset: Offset(-1.5, -1.5),
-                        color: Colors.black),
-                    Shadow(
-                        // bottomRight
-                        offset: Offset(1.5, -1.5),
-                        color: Colors.black),
-                    Shadow(
-                        // topRight
-                        offset: Offset(1.5, 1.5),
-                        color: Colors.black),
-                    Shadow(
-                        // topLeft
-                        offset: Offset(-1.5, 1.5),
-                        color: Colors.black),
-                  ]),
+              style:
+                  TextStyle(fontSize: fontsize, color: Colors.white, shadows: [
+                Shadow(
+                    // bottomLeft
+                    offset: Offset(-shadowsize, -shadowsize),
+                    color: Colors.black),
+                Shadow(
+                    // bottomRight
+                    offset: Offset(shadowsize, -shadowsize),
+                    color: Colors.black),
+                Shadow(
+                    // topRight
+                    offset: Offset(shadowsize, shadowsize),
+                    color: Colors.black),
+                Shadow(
+                    // topLeft
+                    offset: Offset(-shadowsize, shadowsize),
+                    color: Colors.black),
+              ]),
             )).then((value) {
               var i = Image.memory(value.buffer.asUint8List());
               onClick(i.image);

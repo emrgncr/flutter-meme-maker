@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -45,7 +47,7 @@ Future<img.Image> generateImage(List<int> ids,
   //for gif support
   //TODO GIF support
   Map<int, ImageInfo> infos = {};
-  int maxframes = 1;
+  // int maxframes = 1;
   for (int i in ids) {
     ImageProvider prov = elemData[i]!.first;
     var t = await getImageSize(prov);

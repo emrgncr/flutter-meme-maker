@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:meme_maker/generate_img.dart';
 import 'package:meme_maker/generic_element.dart';
@@ -8,7 +10,10 @@ import 'package:meme_maker/url_popup.dart';
 
 class DynamicCheckbox extends StatefulWidget {
   const DynamicCheckbox(
-      {this.initial_state = false, required this.getVar, required this.setVar});
+      {super.key,
+      this.initial_state = false,
+      required this.getVar,
+      required this.setVar});
 
   final bool initial_state;
   final bool Function() getVar;
@@ -57,6 +62,9 @@ Future<T?> generalAddPopup<T>(
             borderRadius: BorderRadius.all(Radius.circular(8))),
         contentPadding: const EdgeInsets.only(
           top: 10.0,
+          bottom: 2,
+          left: 8,
+          right: 8,
         ),
         title: const Text("Options"),
         children: [
@@ -102,7 +110,7 @@ Future<T?> generalAddPopup<T>(
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Dynamic Save Borders:"),
+              const Text("Dynamic Save Borders:"),
               DynamicCheckbox(
                   getVar: () => dynamic_save_border,
                   setVar: (f) {

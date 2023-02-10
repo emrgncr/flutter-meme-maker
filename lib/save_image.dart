@@ -29,7 +29,9 @@ Future<bool> getSavePermissions() async {
   if (status.isGranted) {
     return true;
   }
-  print("status not granted");
+  if (kDebugMode) {
+    print("status not granted");
+  }
   return false;
 }
 
@@ -38,7 +40,9 @@ void chooseLocAndSaveImage(img.Image image) async {
     String? filepath;
     filepath = await chooseSaveLocationWebDesktop();
     if (filepath == null) {
-      print("invalid filepath");
+      if (kDebugMode) {
+        print("invalid filepath");
+      }
       return;
     }
     saveImage(filepath, image);
@@ -46,6 +50,7 @@ void chooseLocAndSaveImage(img.Image image) async {
   } else if (Platform.isAndroid || Platform.isIOS) {
     if (!(await getSavePermissions())) return;
     final filepath = await chooseSaveLocationAndroid();
+    // ignore: unused_local_variable
     final finalPath = await FlutterFileDialog.saveFileToDirectory(
       directory: filepath!,
       data: img.encodeJpg(image, quality: 80),
@@ -67,7 +72,9 @@ Future<String?> chooseSaveLocationWebDesktop() async {
 
 Future<DirectoryLocation?> chooseSaveLocationAndroid() async {
   if (!await FlutterFileDialog.isPickDirectorySupported()) {
-    print("Picking directory not supported");
+    if (kDebugMode) {
+      print("Picking directory not supported");
+    }
     return null;
   }
   final pickedDirectory = await FlutterFileDialog.pickDirectory();

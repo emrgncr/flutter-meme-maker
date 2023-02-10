@@ -19,7 +19,7 @@ class App extends StatelessWidget {
       title: 'emrgncr\'s mame maker',
       theme: ThemeData(
         primarySwatch: Colors.amber,
-        colorScheme: ColorScheme.dark(),
+        colorScheme: const ColorScheme.dark(),
       ),
       home: const HomePage(),
     );
@@ -72,7 +72,6 @@ class _HomePageState extends State<HomePage> {
         ? -1
         : idList.reduce((value, element) => max(value, element));
     int id = maxid + 1;
-    print("added id $id");
     GenericElementStats stats1 = stats ?? GenericElementStats();
     stats1.onDelete = () => removeElementFromMap(id);
     stats1.onMove = (x, y) => onElementMove(id, x, y);

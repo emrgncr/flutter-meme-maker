@@ -129,7 +129,7 @@ Widget sideButton(IconData icon, Color color, double xShift, double yShift,
       onPressed: () {
         onClick();
       },
-      padding: EdgeInsetsDirectional.all(additionalPad),
+      padding: const EdgeInsetsDirectional.all(additionalPad),
       icon: Icon(
         icon,
         color: color,
@@ -190,7 +190,6 @@ class _GenericElementState extends State<GenericElement> {
     locy = stats.locy ?? 0;
     prv = widget.imageProv;
     rotation = stats.rotation ?? 0;
-    print("here?");
     getImageSize(widget.imageProv).then((value) {
       //calculate sizex sizey
       sizex = value.image.width.toDouble();
@@ -228,7 +227,7 @@ class _GenericElementState extends State<GenericElement> {
         top: locy,
         width: max((sizex * mult) + totalPadW, minW),
         height: max((sizey * mult) + totalPadH, minH),
-        child: Container(
+        child: SizedBox(
             width: max((sizex * mult) + totalPadW, minW),
             height: max((sizey * mult) + totalPadH, minH),
             child: Stack(
@@ -244,7 +243,7 @@ class _GenericElementState extends State<GenericElement> {
                       color: Colors.yellow[200] ?? Colors.yellow,
                       dashPattern: [showButtons ? 10 : 1],
                       strokeWidth: showButtons ? 7 : 0,
-                      padding: EdgeInsets.all(1),
+                      padding: const EdgeInsets.all(1),
                       child: Transform(
                         transform: Matrix4.translationValues(
                             sizex * mult / 2, sizey * mult / 2, 0)
