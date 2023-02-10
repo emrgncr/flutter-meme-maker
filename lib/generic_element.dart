@@ -196,14 +196,15 @@ class _GenericElementState extends State<GenericElement> {
       sizex = value.image.width.toDouble();
       sizey = value.image.height.toDouble();
       //get screen size
-      final winW = window.physicalSize.width;
-      final winH = window.physicalSize.height;
+      final mediaQueryData = MediaQuery.of(context);
+      final winW = mediaQueryData.size.width;
+      final winH = mediaQueryData.size.height;
 
       if (sizex > winW) {
-        basemult = (winW - 10) / (sizex * 4);
+        basemult = (winW - 10) / (sizex * 1.5);
       }
       if (sizey > winH) {
-        basemult = min(basemult, (winH - 10) / (sizey * 4));
+        basemult = min(basemult, (winH - 10) / (sizey * 1.5));
       }
       widget.stats?.onResize!(mult);
       setState(() {
