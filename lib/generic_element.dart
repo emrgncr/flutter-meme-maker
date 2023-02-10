@@ -206,7 +206,7 @@ class _GenericElementState extends State<GenericElement> {
       if (sizey > winH) {
         basemult = min(basemult, (winH - 10) / (sizey * 1.5));
       }
-      widget.stats?.onResize!(mult);
+      widget.stats?.onResize!(basemult);
       setState(() {
         mult = basemult;
         sizex = value.image.width.toDouble();
