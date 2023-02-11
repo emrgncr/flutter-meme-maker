@@ -216,6 +216,7 @@ class _GenericElementState extends State<GenericElement> {
           locy -= max((sizey * mult) + totalPadH, minH) / 2;
           widget.stats?.center = false;
         }
+        widget.stats?.onMove!(locx, locy);
       });
     });
   }
