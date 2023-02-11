@@ -109,7 +109,6 @@ class _ElevatedImageButtonState extends State<ElevatedImageButton> {
   @override
   void initState() {
     super.initState();
-    url = "${widget.baseurl}.jpg";
     ImgflipAdapter.getRealUrl(widget.baseurl).then((value) => setState(
           () {
             url = value;
@@ -120,7 +119,7 @@ class _ElevatedImageButtonState extends State<ElevatedImageButton> {
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      widthFactor: .3,
+      widthFactor: .7,
       child: ElevatedButton(
           onPressed: () {
             if (url != null) {
