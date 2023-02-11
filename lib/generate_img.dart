@@ -80,8 +80,8 @@ Future<img.Image> generateImage(List<int> ids,
         width: (img3.width.toDouble() * stats.mult * enchancer_mult).toInt(),
         height: (img3.height.toDouble() * stats.mult * enchancer_mult).toInt());
 
-    double shiftx = (nsx - osx) / 2;
-    double shifty = (nsy - osy) / 2;
+    double shiftx = 0; //(nsx - osx) / 2;
+    double shifty = 0; //(nsy - osy) / 2;
 
     img.compositeImage(
       image, img3,
@@ -109,5 +109,40 @@ Future<math.MutableRectangle<double>> getCoords(
   double mult = stats.mult;
   var sizex = info.image.width * mult;
   var sizey = info.image.height * mult;
-  return math.MutableRectangle<double>(locx, locy, sizex, sizey);
+
+  // recalculate size and loc for rotated image
+
+  var aside = sizex;
+  var bside = sizey;
+
+  var angle = stats.rotation ?? 0;
+
+  while (angle < 0) {
+    angle += 180;
+  }
+  while (angle > 180) {
+    angle -= 180;
+  }
+  if (angle > 90) {
+    angle -= 90;
+    var tmp = aside;
+    aside = bside;
+    bside = tmp;
+  }
+
+  var sina = math.sin(angle * math.pi / 180);
+  var cosa = math.cos(angle * math.pi / 180);
+
+  var newa = (aside * cosa) + (bside * sina);
+  var newb = (bside * cosa) + (aside * sina);
+
+  var xdiff = newa - sizex;
+  var ydiff = newb - sizey;
+
+  locx -= xdiff / 2;
+  locy -= ydiff / 2;
+
+  print("$locx, $locy, $newa, $newb");
+
+  return math.MutableRectangle<double>(locx, locy, newa, newb);
 }
