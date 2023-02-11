@@ -19,7 +19,7 @@ class _PopupTextImageState extends State<PopupTextImage> {
   void initState() {
     super.initState();
     _controller.text = "Enter text";
-    _sizeController.text = "64";
+    _sizeController.text = "200";
   }
 
   @override
