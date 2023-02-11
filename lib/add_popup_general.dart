@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:meme_maker/generate_img.dart';
 import 'package:meme_maker/generic_element.dart';
+import 'package:meme_maker/imgflip_templates.dart';
 import 'package:meme_maker/pair.dart';
 import 'package:meme_maker/save_image.dart';
 import 'package:meme_maker/text_popup.dart';
@@ -53,7 +54,8 @@ Future<T?> generalAddPopup<T>(
     void Function() onDelete,
     List<int> ids,
     Map<int, MutablePair<ImageProvider, GenericElementStats>> elemdata,
-    BuildContext context) async {
+    BuildContext context,
+    {ImgflipAdapter? adapter}) async {
   return showDialog<T>(
     context: context,
     builder: (context) {
@@ -74,6 +76,15 @@ Future<T?> generalAddPopup<T>(
                 showUrlPopup(onUrlClick, context);
               },
               child: const Text("Add image using url")),
+          padding,
+          ElevatedButton(
+              onPressed: () {
+                // Navigator.pop(context);
+                if (adapter != null) {
+                  adapter.imgflipPopup(context);
+                }
+              },
+              child: const Text("Add meme templates")),
           padding,
           ElevatedButton(
               onPressed: () {
@@ -98,7 +109,7 @@ Future<T?> generalAddPopup<T>(
                 Navigator.pop(context);
                 onDelete();
               },
-              child: const Text("Reset Image")),
+              child: const Text("Reset Canvas")),
           padding,
           ElevatedButton(
               onPressed: () {
