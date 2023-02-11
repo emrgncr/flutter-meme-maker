@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:meme_maker/add_popup_general.dart';
 import 'package:meme_maker/generic_element.dart';
+import 'package:meme_maker/imgflip_templates.dart';
 import 'package:meme_maker/pair.dart';
 
 void main() {
@@ -37,6 +38,7 @@ class _HomePageState extends State<HomePage> {
   Map<int, Widget> elems = {};
   Map<int, MutablePair<ImageProvider, GenericElementStats>> elemData = {};
   List<int> idList = [];
+  ImgflipAdapter? adapter;
 
   Widget generateElementFrame(int id) {
     if (!elems.containsKey(id) || elems[id] == null) {
@@ -136,6 +138,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    adapter =
+        ImgflipAdapter(addGenericUrlImage: addGenericUrlImage, pageCount: 1);
     //default images
     //   addGenericUrlImage(
     //       "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpixel-creation.com%2Fwp-content%2Fuploads%2F113-kurumi-tokisaki-hd-wallpapers-background-images-wallpaper-abyss-1-800x800.png&f=1&nofb=1&ipt=e68e232772b16fa8629906a6a411d1276f4a3424cf5c6cf945e85056795b959f&ipo=images");
@@ -216,6 +220,7 @@ class _HomePageState extends State<HomePage> {
                 idList,
                 elemData,
                 context,
+                adapter: adapter,
               ),
           child: const Icon(Icons.settings)),
     );
