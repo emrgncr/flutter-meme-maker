@@ -105,8 +105,21 @@ Future<ImageProvider?> loadImageFromFileDesktop() async {
   return i.image;
 }
 
+Future<ImageProvider?> loadImageFromFileWeb() async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: "Choose an image to load",
+      allowMultiple: false,
+      type: FileType.image);
+  if (result == null) return null;
+  if (result.files.single.bytes == null) return null;
+  Image i = Image.memory(result.files.single.bytes!);
+  return i.image;
+}
+
 Future<ImageProvider?> loadImageFromFile() async {
-  if (kIsWeb || Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
+  if (kIsWeb) {
+    return loadImageFromFileWeb();
+  } else if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
     return loadImageFromFileDesktop();
   } else if (Platform.isAndroid || Platform.isIOS) {
     // return loadImageFromFileAndroid();
