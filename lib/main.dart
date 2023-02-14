@@ -175,18 +175,23 @@ class _HomePageState extends State<HomePage> {
     //   addGenericUrlImage(
     //       "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.redd.it%2Fh6cxvyo43a841.png&f=1&nofb=1&ipt=51d0c5a0d8857fd381f13f8dfce77f51f2d45a412f2f0499044644753bdb9365&ipo=images");
 
-    // For sharing images coming from outside the app while the app is in the memory
+    if (!kIsWeb && Platform.isAndroid) {
+      // For sharing images coming from outside the app while the app is in the memory
 
-    ReceiveSharingIntent.getMediaStream().listen((value) {
-      loadSharedImages(value);
-    }, onError: (err) {
-      print("getIntentDataStream error: $err");
-    }, onDone: () => print("DONE"));
+      ReceiveSharingIntent.getInitialMedia()
+          .then((value) => loadSharedImages(value));
 
-    ReceiveSharingIntent.getMediaStream().single.then((element) {
-      print("NOT??");
-      loadSharedImages(element);
-    }, onError: () => print("ERRR"));
+      ReceiveSharingIntent.getMediaStream().single.then((element) {
+        print("NOT??");
+        loadSharedImages(element);
+      }, onError: (err) => print("ERRR"));
+
+      ReceiveSharingIntent.getMediaStream().listen((value) {
+        loadSharedImages(value);
+      }, onError: (err) {
+        print("getIntentDataStream error: $err");
+      }, onDone: () => print("DONE"));
+    }
   }
 
   void removeElementFromMap(int id) {
