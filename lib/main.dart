@@ -183,12 +183,10 @@ class _HomePageState extends State<HomePage> {
       print("getIntentDataStream error: $err");
     }, onDone: () => print("DONE"));
 
-    ReceiveSharingIntent.getMediaStream().isEmpty.then((value) {
-      if (value) {
-        ReceiveSharingIntent.getMediaStream()
-            .forEach((element) => loadSharedImages(element));
-      }
-    });
+    ReceiveSharingIntent.getMediaStream().single.then((element) {
+      print("NOT??");
+      loadSharedImages(element);
+    }, onError: () => print("ERRR"));
   }
 
   void removeElementFromMap(int id) {
