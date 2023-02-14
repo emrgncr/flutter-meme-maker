@@ -1,10 +1,14 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meme_maker/add_popup_general.dart';
 import 'package:meme_maker/generic_element.dart';
 import 'package:meme_maker/imgflip_templates.dart';
 import 'package:meme_maker/pair.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 void main() {
   runApp(const App());
@@ -16,6 +20,12 @@ class App extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // ReceiveSharingIntent.getMediaStream().listen((value) {
+    //   print(value.length);
+    //   value.forEach((element) {
+    //     print(element.path);
+    //   });
+    // });
     return MaterialApp(
       title: 'emrgncr\'s mame maker',
       theme: ThemeData(
@@ -39,6 +49,8 @@ class _HomePageState extends State<HomePage> {
   Map<int, MutablePair<ImageProvider, GenericElementStats>> elemData = {};
   List<int> idList = [];
   ImgflipAdapter? adapter;
+
+  // String? _sharedText;
 
   Widget generateElementFrame(int id) {
     if (!elems.containsKey(id) || elems[id] == null) {
@@ -135,16 +147,48 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // @override
+  // void dispose() {
+  //   _intentDataStreamSub?.cancel();
+  //   super.dispose();
+  // }
+
+  void loadSharedImages(List<SharedMediaFile> value) {
+    for (final image in value) {
+      if (image.type != SharedMediaType.IMAGE) continue;
+      //not sure if this will work on android
+      final file = File(image.path);
+      final i = Image.file(file);
+      addGenericImage(i.image);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     adapter =
         ImgflipAdapter(addGenericUrlImage: addGenericUrlImage, pageCount: 1);
+
     //default images
     //   addGenericUrlImage(
     //       "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpixel-creation.com%2Fwp-content%2Fuploads%2F113-kurumi-tokisaki-hd-wallpapers-background-images-wallpaper-abyss-1-800x800.png&f=1&nofb=1&ipt=e68e232772b16fa8629906a6a411d1276f4a3424cf5c6cf945e85056795b959f&ipo=images");
     //   addGenericUrlImage(
     //       "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.redd.it%2Fh6cxvyo43a841.png&f=1&nofb=1&ipt=51d0c5a0d8857fd381f13f8dfce77f51f2d45a412f2f0499044644753bdb9365&ipo=images");
+
+    // For sharing images coming from outside the app while the app is in the memory
+
+    ReceiveSharingIntent.getMediaStream().listen((value) {
+      loadSharedImages(value);
+    }, onError: (err) {
+      print("getIntentDataStream error: $err");
+    }, onDone: () => print("DONE"));
+
+    ReceiveSharingIntent.getMediaStream().isEmpty.then((value) {
+      if (value) {
+        ReceiveSharingIntent.getMediaStream()
+            .forEach((element) => loadSharedImages(element));
+      }
+    });
   }
 
   void removeElementFromMap(int id) {
