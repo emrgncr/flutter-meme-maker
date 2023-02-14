@@ -1,5 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meme_maker/generate_img.dart';
 import 'package:meme_maker/generic_element.dart';
@@ -46,92 +49,102 @@ class _DynamicCheckboxState extends State<DynamicCheckbox> {
   }
 }
 
-const padding = Padding(padding: EdgeInsets.symmetric(vertical: 4));
+class MainPopup {
+  static const padding = Padding(padding: EdgeInsets.symmetric(vertical: 4));
 
-Future<T?> generalAddPopup<T>(
-    void Function(String) onUrlClick,
-    void Function(ImageProvider<Object>) onTextClick,
-    void Function() onDelete,
-    List<int> ids,
-    Map<int, MutablePair<ImageProvider, GenericElementStats>> elemdata,
-    BuildContext context,
-    {ImgflipAdapter? adapter}) async {
-  return showDialog<T>(
-    context: context,
-    builder: (context) {
-      return SimpleDialog(
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8))),
-        contentPadding: const EdgeInsets.only(
-          top: 10.0,
-          bottom: 2,
-          left: 8,
-          right: 8,
-        ),
-        title: const Text("Options"),
-        children: [
-          ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                showUrlPopup(onUrlClick, context);
-              },
-              child: const Text("Add image using url")),
-          padding,
-          ElevatedButton(
-              onPressed: () {
-                // Navigator.pop(context);
-                if (adapter != null) {
-                  adapter.imgflipPopup(context);
-                }
-              },
-              child: const Text("Add meme templates")),
-          padding,
-          ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                showPopupText(onTextClick, context);
-              },
-              child: const Text("Add text")),
-          padding,
-          ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                loadImageFromFile().then((provider) {
-                  if (provider != null) {
-                    onTextClick(provider);
-                  }
-                });
-              },
-              child: const Text("Load Image")),
-          padding,
-          ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                onDelete();
-              },
-              child: const Text("Reset Canvas")),
-          padding,
-          ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                chooseAndSaveScratch(ids, elemdata);
-              },
-              child: const Text("Save")),
-          padding,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Dynamic Save Borders:"),
-              DynamicCheckbox(
-                  getVar: () => dynamic_save_border,
-                  setVar: (f) {
-                    dynamic_save_border = f;
-                  })
-            ],
+  static Future<T?> generalAddPopup<T>(
+      void Function(String) onUrlClick,
+      void Function(ImageProvider<Object>) onTextClick,
+      void Function() onDelete,
+      List<int> ids,
+      Map<int, MutablePair<ImageProvider, GenericElementStats>> elemdata,
+      BuildContext context,
+      {ImgflipAdapter? adapter}) async {
+    return showDialog<T>(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          contentPadding: const EdgeInsets.only(
+            top: 10.0,
+            bottom: 2,
+            left: 8,
+            right: 8,
           ),
-          padding,
-        ],
-      );
-    },
-  );
+          title: const Text("Options"),
+          children: [
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  PopupUrlImage.showUrlPopup(onUrlClick, context);
+                },
+                child: const Text("Add image using url")),
+            padding,
+            ElevatedButton(
+                onPressed: () {
+                  // Navigator.pop(context);
+                  if (adapter != null) {
+                    adapter.imgflipPopup(context);
+                  }
+                },
+                child: const Text("Add meme templates")),
+            padding,
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  PopupTextImage.showPopupText(onTextClick, context);
+                },
+                child: const Text("Add text")),
+            padding,
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  SaveImg.loadImageFromFile().then((provider) {
+                    if (provider != null) {
+                      onTextClick(provider);
+                    }
+                  });
+                },
+                child: const Text("Load Image")),
+            padding,
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  onDelete();
+                },
+                child: const Text("Reset Canvas")),
+            padding,
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  SaveImg.chooseAndSaveScratch(ids, elemdata);
+                },
+                child: const Text("Save")),
+            padding,
+            if (!kIsWeb && Platform.isAndroid)
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    SaveImg.shareImageScratch(ids, elemdata);
+                  },
+                  child: const Text("Share")),
+            if (!kIsWeb && Platform.isAndroid) padding,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Dynamic Save Borders:"),
+                DynamicCheckbox(
+                    getVar: () => GenerateImg.dynamic_save_border,
+                    setVar: (f) {
+                      GenerateImg.dynamic_save_border = f;
+                    })
+              ],
+            ),
+            padding,
+          ],
+        );
+      },
+    );
+  }
 }

@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as htmlparser;
 import 'package:meme_maker/add_popup_general.dart';
+import 'package:meme_maker/url_popup.dart';
 
 class ImgflipAdapter {
   ImgflipAdapter(
@@ -69,11 +73,18 @@ class ImgflipAdapter {
   }
 
   Future<T?> imgflipPopup<T>(BuildContext context) async {
-    print("a");
+    const String testurl = "imgflip.com";
+
+    final test =
+        await PopupUrlImage.testforConnection(context, testurl: testurl);
+    if (test != null) return test;
+
     if (templateURLs.isEmpty) {
       templateURLs = await getUrls();
     }
-    print(templateURLs);
+    if (kDebugMode) {
+      print(templateURLs);
+    }
 
     return showDialog<T>(
         context: context,

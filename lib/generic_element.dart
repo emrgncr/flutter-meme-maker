@@ -4,39 +4,7 @@ import 'dart:ui';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-
-Future<ImageInfo> getImageSize(ImageProvider<Object> x) async {
-  Completer<ImageInfo> comp = Completer<ImageInfo>();
-  var res = x.resolve(ImageConfiguration.empty);
-  var listener = ImageStreamListener(
-    (image, synchronousCall) {
-      try {
-        comp.complete(image);
-      } catch (err) {
-        print("I guess error because of gif, ignore maybe");
-      }
-    },
-  );
-  res.addListener(listener);
-  comp.future.then((value) => res.removeListener(listener));
-
-  return comp.future;
-}
-
-GenericElement netImageElement({
-  required String imgUrl,
-  required int id,
-  GenericElementStats? stats,
-}) {
-  Image img = Image.network(
-    imgUrl,
-  );
-  return GenericElement(
-    imageProv: img.image,
-    id: id,
-    stats: stats ?? GenericElementStats(),
-  );
-}
+import 'package:meme_maker/generate_img.dart';
 
 class GenericElementStats {
   GenericElementStats({
@@ -91,7 +59,43 @@ class GenericElementStats {
   }
 }
 
-final defaultStats = GenericElementStats();
+class StaticUtil {
+  static const double iconSize = 36;
+  static const double additionalPad = 12;
+  static const EdgeInsets outerPadding =
+      EdgeInsets.fromLTRB(iconSize + (2 * additionalPad), 0, 0, 0);
+  static final totalPadW = outerPadding.left + outerPadding.right;
+  static final totalPadH = outerPadding.top + outerPadding.bottom;
+
+// ignore: constant_identifier_names
+  static const double sizeup_amn = 0.05;
+  static const int buttonCount = 7;
+  static const double minH = buttonCount * (iconSize + (2 * additionalPad));
+  static const double minW = (iconSize + (2 * additionalPad));
+
+  static Widget sideButton(IconData icon, Color color, double xShift,
+      double yShift, dynamic Function() onClick) {
+    return Positioned(
+      left: 0 + xShift,
+      top: 0 + yShift,
+      width: iconSize + (2 * additionalPad),
+      height: iconSize + (2 * additionalPad),
+      child: IconButton(
+        onPressed: () {
+          onClick();
+        },
+        padding: const EdgeInsetsDirectional.all(additionalPad),
+        icon: Icon(
+          icon,
+          color: color,
+          size: iconSize,
+        ),
+      ),
+    );
+  }
+
+  static final defaultStats = GenericElementStats();
+}
 
 class GenericElement extends StatefulWidget {
   const GenericElement(
@@ -103,40 +107,21 @@ class GenericElement extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _GenericElementState();
-}
 
-const double iconSize = 36;
-const double additionalPad = 12;
-const EdgeInsets outerPadding =
-    EdgeInsets.fromLTRB(iconSize + (2 * additionalPad), 0, 0, 0);
-final totalPadW = outerPadding.left + outerPadding.right;
-final totalPadH = outerPadding.top + outerPadding.bottom;
-
-// ignore: constant_identifier_names
-const double sizeup_amn = 0.05;
-const int buttonCount = 7;
-const double minH = buttonCount * (iconSize + (2 * additionalPad));
-const double minW = (iconSize + (2 * additionalPad));
-
-Widget sideButton(IconData icon, Color color, double xShift, double yShift,
-    dynamic Function() onClick) {
-  return Positioned(
-    left: 0 + xShift,
-    top: 0 + yShift,
-    width: iconSize + (2 * additionalPad),
-    height: iconSize + (2 * additionalPad),
-    child: IconButton(
-      onPressed: () {
-        onClick();
-      },
-      padding: const EdgeInsetsDirectional.all(additionalPad),
-      icon: Icon(
-        icon,
-        color: color,
-        size: iconSize,
-      ),
-    ),
-  );
+  static GenericElement netImageElement({
+    required String imgUrl,
+    required int id,
+    GenericElementStats? stats,
+  }) {
+    Image img = Image.network(
+      imgUrl,
+    );
+    return GenericElement(
+      imageProv: img.image,
+      id: id,
+      stats: stats ?? GenericElementStats(),
+    );
+  }
 }
 
 class _GenericElementState extends State<GenericElement> {
@@ -190,7 +175,7 @@ class _GenericElementState extends State<GenericElement> {
     locy = stats.locy ?? 0;
     prv = widget.imageProv;
     rotation = stats.rotation ?? 0;
-    getImageSize(widget.imageProv).then((value) {
+    GenerateImg.getImageSize(widget.imageProv).then((value) {
       //calculate sizex sizey
       sizex = value.image.width.toDouble();
       sizey = value.image.height.toDouble();
@@ -212,8 +197,10 @@ class _GenericElementState extends State<GenericElement> {
         sizey = value.image.height.toDouble();
         //center the location
         if (stats.center) {
-          locx -= max((sizex * mult) + totalPadW, minW) / 2;
-          locy -= max((sizey * mult) + totalPadH, minH) / 2;
+          locx -=
+              max((sizex * mult) + StaticUtil.totalPadW, StaticUtil.minW) / 2;
+          locy -=
+              max((sizey * mult) + StaticUtil.totalPadH, StaticUtil.minH) / 2;
           widget.stats?.center = false;
         }
         widget.stats?.onMove!(locx, locy);
@@ -226,17 +213,17 @@ class _GenericElementState extends State<GenericElement> {
     return Positioned(
         left: locx,
         top: locy,
-        width: max((sizex * mult) + totalPadW, minW),
-        height: max((sizey * mult) + totalPadH, minH),
+        width: max((sizex * mult) + StaticUtil.totalPadW, StaticUtil.minW),
+        height: max((sizey * mult) + StaticUtil.totalPadH, StaticUtil.minH),
         child: SizedBox(
-            width: max((sizex * mult) + totalPadW, minW),
-            height: max((sizey * mult) + totalPadH, minH),
+            width: max((sizex * mult) + StaticUtil.totalPadW, StaticUtil.minW),
+            height: max((sizey * mult) + StaticUtil.totalPadH, StaticUtil.minH),
             child: Stack(
               alignment: AlignmentDirectional.topStart,
               children: [
                 Positioned(
-                  left: totalPadW,
-                  top: totalPadH,
+                  left: StaticUtil.totalPadW,
+                  top: StaticUtil.totalPadH,
                   width: sizex * mult,
                   height: sizey * mult,
                   child: GestureDetector(
@@ -277,17 +264,22 @@ class _GenericElementState extends State<GenericElement> {
                 ),
                 if (showButtons && stats.deletable)
                   // Delete button
-                  sideButton(Icons.delete, Colors.red, 0, 0, () {
+                  StaticUtil.sideButton(Icons.delete, Colors.red, 0, 0, () {
                     if (stats.deletable && stats.onDelete != null) {
                       stats.onDelete!();
                     }
                   }),
                 if (showButtons && stats.resizable)
                   // Size up button
-                  sideButton(Icons.arrow_circle_up, Colors.yellow, 0,
-                      1 * (iconSize + (2 * additionalPad)), () {
+                  StaticUtil.sideButton(
+                      Icons.arrow_circle_up,
+                      Colors.yellow,
+                      0,
+                      1 *
+                          (StaticUtil.iconSize +
+                              (2 * StaticUtil.additionalPad)), () {
                     if (stats.resizable) {
-                      double s = sizeup_amn * basemult;
+                      double s = StaticUtil.sizeup_amn * basemult;
                       if (mult + s > (10 * basemult)) {
                         s = ((10 * basemult) - mult);
                       }
@@ -300,10 +292,15 @@ class _GenericElementState extends State<GenericElement> {
                   }),
                 if (showButtons && stats.resizable)
                   // Size down button
-                  sideButton(Icons.arrow_circle_down, Colors.yellow, 0,
-                      2 * (iconSize + (2 * additionalPad)), () {
+                  StaticUtil.sideButton(
+                      Icons.arrow_circle_down,
+                      Colors.yellow,
+                      0,
+                      2 *
+                          (StaticUtil.iconSize +
+                              (2 * StaticUtil.additionalPad)), () {
                     if (stats.resizable) {
-                      double s = sizeup_amn * basemult;
+                      double s = StaticUtil.sizeup_amn * basemult;
                       if ((mult - s) < (.1 * basemult)) {
                         s = (mult - (.1 * basemult));
                       }
@@ -316,8 +313,13 @@ class _GenericElementState extends State<GenericElement> {
                   }),
                 if (showButtons && stats.rotatable)
                   // Rotate up Button
-                  sideButton(Icons.rotate_right, Colors.purple, 0,
-                      3 * (iconSize + (2 * additionalPad)), () {
+                  StaticUtil.sideButton(
+                      Icons.rotate_right,
+                      Colors.purple,
+                      0,
+                      3 *
+                          (StaticUtil.iconSize +
+                              (2 * StaticUtil.additionalPad)), () {
                     changeRotation(15);
                     if (stats.rotatable && stats.onRotate != null) {
                       stats.onRotate!(15);
@@ -325,8 +327,13 @@ class _GenericElementState extends State<GenericElement> {
                   }),
                 if (showButtons && stats.rotatable)
                   // Rotate down Button
-                  sideButton(Icons.rotate_left, Colors.purple, 0,
-                      4 * (iconSize + (2 * additionalPad)), () {
+                  StaticUtil.sideButton(
+                      Icons.rotate_left,
+                      Colors.purple,
+                      0,
+                      4 *
+                          (StaticUtil.iconSize +
+                              (2 * StaticUtil.additionalPad)), () {
                     changeRotation(-15);
                     if (stats.rotatable && stats.onRotate != null) {
                       stats.onRotate!(-15);
@@ -334,16 +341,26 @@ class _GenericElementState extends State<GenericElement> {
                   }),
                 if (showButtons && stats.layerShiftable)
                   // Layer up Button
-                  sideButton(Icons.keyboard_double_arrow_up, Colors.green, 0,
-                      5 * (iconSize + (2 * additionalPad)), () {
+                  StaticUtil.sideButton(
+                      Icons.keyboard_double_arrow_up,
+                      Colors.green,
+                      0,
+                      5 *
+                          (StaticUtil.iconSize +
+                              (2 * StaticUtil.additionalPad)), () {
                     if (stats.layerShiftable && stats.onLayerShift != null) {
                       stats.onLayerShift!(1);
                     }
                   }),
                 if (showButtons && stats.layerShiftable)
                   // Layer down Button
-                  sideButton(Icons.keyboard_double_arrow_down, Colors.green, 0,
-                      6 * (iconSize + (2 * additionalPad)), () {
+                  StaticUtil.sideButton(
+                      Icons.keyboard_double_arrow_down,
+                      Colors.green,
+                      0,
+                      6 *
+                          (StaticUtil.iconSize +
+                              (2 * StaticUtil.additionalPad)), () {
                     if (stats.layerShiftable && stats.onLayerShift != null) {
                       stats.onLayerShift!(-1);
                     }

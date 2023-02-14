@@ -9,6 +9,60 @@ class PopupTextImage extends StatefulWidget {
 
   @override
   createState() => _PopupTextImageState();
+
+  static Future<T?> showPopupText<T>(
+      void Function(ImageProvider<Object>) onClick,
+      BuildContext context) async {
+    return showDialog<T>(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          contentPadding: const EdgeInsets.only(
+            top: 10.0,
+          ),
+          title: const Text("Add text as image"),
+          children: [
+            PopupTextImage(onClick: (s, n) {
+              double fontsize = double.tryParse(n) ?? 200;
+              double shadowsize = 1.5 * fontsize / 64;
+              WidgetToImage.widgetToImage(Text(
+                s,
+                textDirection: TextDirection.ltr,
+                style: TextStyle(
+                    fontSize: fontsize,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                          // bottomLeft
+                          offset: Offset(-shadowsize, -shadowsize),
+                          color: Colors.black),
+                      Shadow(
+                          // bottomRight
+                          offset: Offset(shadowsize, -shadowsize),
+                          color: Colors.black),
+                      Shadow(
+                          // topRight
+                          offset: Offset(shadowsize, shadowsize),
+                          color: Colors.black),
+                      Shadow(
+                          // topLeft
+                          offset: Offset(-shadowsize, shadowsize),
+                          color: Colors.black),
+                    ]),
+              )).then((value) {
+                var i = Image.memory(value.buffer.asUint8List());
+                onClick(i.image);
+              });
+
+              Navigator.pop(context);
+            })
+          ],
+        );
+      },
+    );
+  }
 }
 
 class _PopupTextImageState extends State<PopupTextImage> {
@@ -33,13 +87,13 @@ class _PopupTextImageState extends State<PopupTextImage> {
               TextField(
                 controller: _controller,
               ),
-              padding,
+              MainPopup.padding,
               const Text("Text size:"),
               TextField(
                 controller: _sizeController,
                 keyboardType: TextInputType.number,
               ),
-              padding,
+              MainPopup.padding,
               ElevatedButton(
                   onPressed: () =>
                       widget.onClick(_controller.text, _sizeController.text),
@@ -48,55 +102,4 @@ class _PopupTextImageState extends State<PopupTextImage> {
           ),
         ));
   }
-}
-
-Future<T?> showPopupText<T>(
-    void Function(ImageProvider<Object>) onClick, BuildContext context) async {
-  return showDialog<T>(
-    context: context,
-    builder: (context) {
-      return SimpleDialog(
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8))),
-        contentPadding: const EdgeInsets.only(
-          top: 10.0,
-        ),
-        title: const Text("Add text as image"),
-        children: [
-          PopupTextImage(onClick: (s, n) {
-            double fontsize = double.tryParse(n) ?? 200;
-            double shadowsize = 1.5 * fontsize / 64;
-            WidgetToImage.widgetToImage(Text(
-              s,
-              textDirection: TextDirection.ltr,
-              style:
-                  TextStyle(fontSize: fontsize, color: Colors.white, shadows: [
-                Shadow(
-                    // bottomLeft
-                    offset: Offset(-shadowsize, -shadowsize),
-                    color: Colors.black),
-                Shadow(
-                    // bottomRight
-                    offset: Offset(shadowsize, -shadowsize),
-                    color: Colors.black),
-                Shadow(
-                    // topRight
-                    offset: Offset(shadowsize, shadowsize),
-                    color: Colors.black),
-                Shadow(
-                    // topLeft
-                    offset: Offset(-shadowsize, shadowsize),
-                    color: Colors.black),
-              ]),
-            )).then((value) {
-              var i = Image.memory(value.buffer.asUint8List());
-              onClick(i.image);
-            });
-
-            Navigator.pop(context);
-          })
-        ],
-      );
-    },
-  );
 }

@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="me.emrgncr.meme_maker">
+    <uses-permission android:name="android.permission.INTERNET" /> 
    <application
         android:label="meme_maker"
         android:name="${applicationName}"

@@ -207,7 +207,7 @@ class _HomePageState extends State<HomePage> {
               children: getMainWidgets(),
             ),
       floatingActionButton: FloatingActionButton(
-          onPressed: () => generalAddPopup(
+          onPressed: () => MainPopup.generalAddPopup(
                 addGenericUrlImage,
                 addGenericImage,
                 () {
