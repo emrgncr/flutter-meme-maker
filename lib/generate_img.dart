@@ -32,7 +32,7 @@ class GenerateImg {
   static bool gif_support = false;
   static double min_resolution = 1080;
 
-  static Future<img.Image> generateImage(
+  static Future<img.Image?> generateImage(
       List<int> ids,
       Map<int, MutablePair<ImageProvider, GenericElementStats>>
           elemData) async {
@@ -42,7 +42,7 @@ class GenerateImg {
       coords.putIfAbsent(i, () => t);
     }
     //get the big image
-
+    if (ids.isEmpty) return null;
     math.MutableRectangle<double> main = math.MutableRectangle<double>(
         0, 0, window.physicalSize.width, window.physicalSize.height);
 

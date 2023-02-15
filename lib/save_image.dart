@@ -21,14 +21,18 @@ class SaveImg {
       List<int> ids,
       Map<int, MutablePair<ImageProvider, GenericElementStats>>
           elemData) async {
-    saveImage(filepath, await GenerateImg.generateImage(ids, elemData));
+    var image = await GenerateImg.generateImage(ids, elemData);
+    if (image == null) return;
+    saveImage(filepath, image);
   }
 
   static void chooseAndSaveScratch(
       List<int> ids,
       Map<int, MutablePair<ImageProvider, GenericElementStats>>
           elemData) async {
-    chooseLocAndSaveImage(await GenerateImg.generateImage(ids, elemData));
+    var image = await GenerateImg.generateImage(ids, elemData);
+    if (image == null) return;
+    chooseLocAndSaveImage(image);
   }
 
   static Future<bool> getSavePermissions() async {
@@ -147,11 +151,10 @@ class SaveImg {
       List<int> ids,
       Map<int, MutablePair<ImageProvider, GenericElementStats>>
           elemData) async {
+    var image = await GenerateImg.generateImage(ids, elemData);
+    if (image == null) return;
     Share.shareXFiles([
-      XFile.fromData(
-          img.encodeJpg(await GenerateImg.generateImage(ids, elemData),
-              quality: 80),
-          mimeType: "image/jpeg"),
+      XFile.fromData(img.encodeJpg(image, quality: 80), mimeType: "image/jpeg"),
     ], subject: "Image made with emrgncr's mem maker");
   }
 }
