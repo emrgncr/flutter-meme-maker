@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:meme_maker/generate_img.dart';
 import 'package:meme_maker/generic_element.dart';
 import 'package:meme_maker/imgflip_templates.dart';
+import 'package:meme_maker/info_popups.dart';
 import 'package:meme_maker/pair.dart';
 import 'package:meme_maker/save_image.dart';
 import 'package:meme_maker/text_popup.dart';
@@ -142,6 +143,25 @@ class MainPopup {
               ],
             ),
             padding,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: () => InfoPopups.infoPopup(context),
+                  icon: const Icon(Icons.info_outline),
+                  tooltip: "info button",
+                ),
+                //TODO: add a proper help button
+                if (!kIsWeb && Platform.isAndroid)
+                  IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        SaveImg.shareImageScratch(ids, elemdata);
+                      },
+                      icon: Icon(Icons.share))
+              ],
+            ),
+            padding
           ],
         );
       },
