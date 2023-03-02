@@ -60,7 +60,7 @@ class MainPopup {
       List<int> ids,
       Map<int, MutablePair<ImageProvider, GenericElementStats>> elemdata,
       BuildContext context,
-      {ImgflipAdapter? adapter}) async {
+      {OfflineAdapter? adapter}) async {
     return showDialog<T>(
       context: context,
       builder: (context) {
@@ -86,7 +86,9 @@ class MainPopup {
                 onPressed: () {
                   // Navigator.pop(context);
                   if (adapter != null) {
-                    adapter.imgflipPopup(context);
+                    // adapter.imgflipPopup(context);
+                    adapter.suggestedPopup(context);
+                    // adapter.getImages();
                   }
                 },
                 child: const Text("Add meme templates")),
