@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
   Map<int, Widget> elems = {};
   Map<int, MutablePair<ImageProvider, GenericElementStats>> elemData = {};
   List<int> idList = [];
-  OfflineAdapter? adapter;
+  ImgflipAdapter? adapter;
 
   // String? _sharedText;
 
@@ -103,10 +103,6 @@ class _HomePageState extends State<HomePage> {
       elems.putIfAbsent(id, () => elem);
     });
     elemData.putIfAbsent(id, () => MutablePair(prov, stats1));
-  }
-
-  void addGenericAssetImage(String assetUrl) {
-    addGenericImage(Image.asset(assetUrl).image);
   }
 
   void addGenericImage(ImageProvider prov) {
@@ -170,8 +166,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    StaticAssets.setup();
-    adapter = OfflineAdapter(addGenericUrlImage: addGenericAssetImage);
+    adapter =
+        ImgflipAdapter(addGenericUrlImage: addGenericUrlImage, pageCount: 1);
 
     //default images
     //   addGenericUrlImage(
