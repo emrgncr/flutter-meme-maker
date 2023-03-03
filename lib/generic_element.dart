@@ -89,6 +89,7 @@ class StaticUtil {
           icon,
           color: color,
           size: iconSize,
+          shadows: [Shadow(blurRadius: .4)],
         ),
       ),
     );

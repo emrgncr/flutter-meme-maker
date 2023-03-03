@@ -145,6 +145,7 @@ class MainPopup {
               ],
             ),
             padding,
+            /*
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -164,6 +165,7 @@ class MainPopup {
               ],
             ),
             padding
+            */
           ],
         );
       },

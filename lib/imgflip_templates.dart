@@ -108,7 +108,7 @@ class ImgflipAdapter {
       templateURLs = await getUrls();
     }
     if (kDebugMode) {
-      print(templateURLs);
+      // print(templateURLs);
     }
 
     return showDialog<T>(
@@ -158,7 +158,7 @@ class OfflineAdapter {
     return ret;
   }
 
-  Future<T?> suggestedPopup<T>(BuildContext context) async {
+  Future<void> suggestedPopup<T>(BuildContext context) async {
     var res = await showSearch(
         context: context,
         delegate: OfflineDelegate(addGenericUrlImage: addGenericUrlImage));
@@ -168,11 +168,11 @@ class OfflineAdapter {
   }
 
   Future<T?> imgflipPopup<T>(BuildContext context) async {
-    print("aa");
+    // print("aa");
     List<String> imageLocs = StaticAssets.assetUrls;
-    print("hh");
+    // print("hh");
     if (kDebugMode) {
-      print(imageLocs);
+      // print(imageLocs);
     }
 
     return showDialog<T>(
@@ -204,18 +204,23 @@ class OfflineDelegate extends SearchDelegate<String?> {
     const st = "assets/meme_templates/meme_";
     int i1 = st.length;
     int i2 = ".jpg".length;
-    print(s1);
+    // print(s1);
     s1 = s1.substring(i1, s1.length - i2).replaceAll("-", " ");
     return s1;
   }
 
   int compareBySimilarity(String s1, String s2, String arg) {
-    s1 = removeComp(s1);
-    s2 = removeComp(s2);
+    const int cfactor = 100000;
 
-    int sim1 = (StringSimilarity.compareTwoStrings(s1, arg) * 100).toInt();
-    int sim2 = (StringSimilarity.compareTwoStrings(s2, arg) * 100).toInt();
-    return sim2 - sim1;
+    s1 = removeComp(s1).toLowerCase();
+    s2 = removeComp(s2).toLowerCase();
+
+    double sim1 = StringSimilarity.compareTwoStrings(s1, arg);
+    double sim2 = StringSimilarity.compareTwoStrings(s2, arg);
+
+    print("str1: $s1, str2: $s2, sim: ${(sim1 - sim2) * cfactor}");
+
+    return ((sim2 - sim1) * cfactor).toInt();
   }
 
   @override
@@ -249,10 +254,11 @@ class OfflineDelegate extends SearchDelegate<String?> {
 
   @override
   Widget buildResults(BuildContext context) {
-    possibleSuggestions.sort((s1, s2) => compareBySimilarity(s1, s2, query));
+    possibleSuggestions
+        .sort((s1, s2) => compareBySimilarity(s1, s2, query.toLowerCase()));
 
     return _SuggestionList(
-        suggestions: possibleSuggestions.sublist(0, 8),
+        suggestions: possibleSuggestions.sublist(0, 24),
         istext: false,
         query: query,
         onSelected: (s1) {
@@ -265,7 +271,7 @@ class OfflineDelegate extends SearchDelegate<String?> {
     possibleSuggestions.sort((s1, s2) => compareBySimilarity(s1, s2, query));
 
     return _SuggestionList(
-        suggestions: possibleSuggestions.sublist(0, 10),
+        suggestions: possibleSuggestions,
         istext: true,
         query: query,
         onSelected: (s1) {
@@ -295,9 +301,12 @@ class _SuggestionList extends StatelessWidget {
           ? (BuildContext context, int i) {
               final String suggestion = suggestions[i];
               return ListTile(
-                leading: query.isEmpty
-                    ? const Icon(Icons.history)
-                    : const Icon(null),
+                leading: SizedBox(
+                  width: 100,
+                  child: Image.asset(
+                    suggestion,
+                  ),
+                ),
                 title: Text(OfflineDelegate.removeComp(suggestion)),
                 onTap: () {
                   onSelected(suggestion);
@@ -338,6 +347,7 @@ class ElevatedImageButton extends StatefulWidget {
 
 class _ElevatedImageButtonState extends State<ElevatedImageButton> {
   String? url;
+  Image? child;
 
   @override
   void initState() {
@@ -351,6 +361,19 @@ class _ElevatedImageButtonState extends State<ElevatedImageButton> {
     } else {
       url = widget.baseurl;
     }
+
+    child = getChild();
+  }
+
+  Image? getChild() {
+    return url != null
+        ? (widget.offline
+            ? Image.asset(
+                url!,
+                fit: BoxFit.cover,
+              )
+            : Image.network(url!))
+        : null;
   }
 
   @override
@@ -358,18 +381,21 @@ class _ElevatedImageButtonState extends State<ElevatedImageButton> {
     return FractionallySizedBox(
       widthFactor: .7,
       child: ElevatedButton(
-          onPressed: () {
-            if (url != null) {
-              widget.onClick(url!);
-            }
-            Navigator.pop(context);
-          },
-          style: const ButtonStyle(
-            backgroundColor: MaterialStatePropertyAll(Colors.deepPurple),
-          ),
-          child: url != null
-              ? (widget.offline ? Image.asset(url!) : Image.network(url!))
-              : null),
+        onPressed: () {
+          if (url != null) {
+            widget.onClick(url!);
+          }
+          Navigator.pop(context);
+        },
+        style: const ButtonStyle(
+          backgroundColor: MaterialStatePropertyAll(Colors.transparent),
+          maximumSize:
+              MaterialStatePropertyAll(Size(double.infinity, double.infinity)),
+          // overlayColor: MaterialStatePropertyAll(Colors.transparent),
+          // shadowColor: MaterialStatePropertyAll(Colors.transparent),
+        ),
+        child: child,
+      ),
     );
   }
 }
