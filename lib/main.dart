@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
     stats1.onMove = (x, y) => onElementMove(id, x, y);
     stats1.onResize = (s) => onElementResize(id, s);
     stats1.onLayerShift = (c) => onElementLayerChange(id, c);
-    stats1.onRotate = (p0) => onElementRotate(id, p0);
+    stats1.onRotate = (p0, b) => onElementRotate(id, p0, b);
     Widget elem = GenericElement(
       id: id,
       imageProv: prov,
@@ -219,10 +219,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void onElementRotate(int id, double rot) {
+  void onElementRotate(int id, double rot, bool relative) {
     if (elemData.containsKey(id)) {
       elemData[id]!.second.rotation =
-          (elemData[id]!.second.rotation ?? 0) + rot;
+          relative ? (elemData[id]!.second.rotation ?? 0) + rot : rot;
     }
   }
 

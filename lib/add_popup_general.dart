@@ -145,6 +145,12 @@ class MainPopup {
               ],
             ),
             padding,
+            IconButton(
+              onPressed: () => InfoPopups.helpPopup(context),
+              icon: const Icon(Icons.help_outline),
+              tooltip: "help button",
+            ),
+            padding,
             /*
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

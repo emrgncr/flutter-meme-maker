@@ -47,7 +47,7 @@ class GenericElementStats {
   void Function(Map<String, dynamic>)? onEdit;
   void Function(double, double)? onMove;
   void Function(int)? onLayerShift;
-  void Function(double)? onRotate;
+  void Function(double, bool)? onRotate;
 
   @override
   String toString() {
@@ -151,6 +151,8 @@ class _GenericElementState extends State<GenericElement> {
   double locx = 0;
   double locy = 0;
 
+  double scale_start = 0;
+  double rot_start = double.nan;
   bool showButtons = false;
 
   ImageProvider? prv;
@@ -170,15 +172,25 @@ class _GenericElementState extends State<GenericElement> {
     });
   }
 
+  void multMult(double x) {
+    setState(() {
+      mult = scale_start * x;
+    });
+  }
+
   void setShowButtons(bool x) {
     setState(() {
       showButtons = x;
     });
   }
 
-  void changeRotation(double x) {
+  void changeRotation(double x, bool relative) {
     setState(() {
-      rotation += x;
+      if (relative) {
+        rotation += x;
+      } else {
+        rotation = x;
+      }
     });
   }
 
@@ -224,176 +236,233 @@ class _GenericElementState extends State<GenericElement> {
     });
   }
 
+  void scaleUpdate(ScaleUpdateDetails details) {
+    if (showButtons && stats.movable && details.pointerCount >= 1) {
+      double dx = details.focalPointDelta.dx;
+      double dy = details.focalPointDelta.dy;
+      changeLoc(dx, dy);
+      if (stats.onMove != null) {
+        stats.onMove!(locx + dx, locy + dy);
+      }
+    }
+    if (showButtons && stats.resizable) {
+      if (details.pointerCount == 2) {
+        double oldsx = sizex * mult;
+        double oldsy = sizey * mult;
+
+        double nsx = sizex * scale_start * details.scale;
+        double nsy = sizey * scale_start * details.scale;
+
+        double dx = (nsx - oldsx) / 2;
+        double dy = (nsy - oldsy) / 2;
+
+        changeLoc(-dx, -dy);
+        if (stats.onMove != null) {
+          stats.onMove!(locx - dx, locy - dy);
+        }
+        if (stats.onResize != null) {
+          stats.onResize!(scale_start * details.scale);
+        }
+        multMult(details.scale);
+      }
+    }
+    if (showButtons && stats.rotatable) {
+      // print(details.rotation);
+      double rotation_deg = (details.rotation * 180 / pi) + rot_start;
+      if (details.pointerCount == 2) {
+        changeRotation(rotation_deg, false);
+        if (stats.rotatable && stats.onRotate != null) {
+          stats.onRotate!(rotation_deg, false);
+        }
+      }
+    }
+  }
+
+  double roundRotation() {
+    int rt = rotation.toInt();
+    while (rt < 0) rt += 360;
+    int ramn = 30;
+    int man = rt % ramn;
+    int ramn2 = ramn ~/ 2;
+    if (man > ramn2) {
+      return (rt - man + ramn).toDouble();
+    }
+    return (rt - man).toDouble();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Positioned(
-        left: locx,
-        top: locy,
+      left: locx,
+      top: locy,
+      width: max((sizex * mult) + StaticUtil.totalPadW, StaticUtil.minW),
+      height: max((sizey * mult) + StaticUtil.totalPadH, StaticUtil.minH),
+      child: SizedBox(
         width: max((sizex * mult) + StaticUtil.totalPadW, StaticUtil.minW),
         height: max((sizey * mult) + StaticUtil.totalPadH, StaticUtil.minH),
-        child: SizedBox(
-            width: max((sizex * mult) + StaticUtil.totalPadW, StaticUtil.minW),
-            height: max((sizey * mult) + StaticUtil.totalPadH, StaticUtil.minH),
-            child: Stack(
-              alignment: AlignmentDirectional.topStart,
-              children: [
-                Positioned(
-                  // image
-                  left: StaticUtil.totalPadW,
-                  top: StaticUtil.totalPadH,
-                  width: sizex * mult,
-                  height: sizey * mult,
-                  child: GestureDetector(
-                    child: DottedBorder(
-                      color: Colors.yellow[200] ?? Colors.yellow,
-                      dashPattern: [showButtons ? 10 : 1],
-                      strokeWidth: showButtons ? 7 : 0,
-                      padding: const EdgeInsets.all(1),
-                      child: Transform(
-                        transform: Matrix4.translationValues(
-                            sizex * mult / 2, sizey * mult / 2, 0)
-                          ..rotateZ(rotation * pi / 180)
-                          ..translate(-sizex * mult / 2, -sizey * mult / 2, 0),
-                        child: SizedBox(
-                          width: sizex * mult,
-                          height: sizey * mult,
-                          child: Image(
-                            image: prv ?? widget.imageProv,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+        child: Stack(
+          alignment: AlignmentDirectional.topStart,
+          children: [
+            Positioned(
+              // image
+              left: StaticUtil.totalPadW,
+              top: StaticUtil.totalPadH,
+              width: sizex * mult,
+              height: sizey * mult,
+              child: GestureDetector(
+                child: DottedBorder(
+                  color: Colors.yellow[200] ?? Colors.yellow,
+                  dashPattern: [showButtons ? 10 : 1],
+                  strokeWidth: showButtons ? 7 : 0,
+                  padding: const EdgeInsets.all(1),
+                  child: Transform(
+                    transform: Matrix4.translationValues(
+                        sizex * mult / 2, sizey * mult / 2, 0)
+                      ..rotateZ(rotation * pi / 180)
+                      ..translate(-sizex * mult / 2, -sizey * mult / 2, 0),
+                    child: SizedBox(
+                      width: sizex * mult,
+                      height: sizey * mult,
+                      child: Image(
+                        image: prv ?? widget.imageProv,
+                        fit: BoxFit.contain,
                       ),
                     ),
-                    onLongPress: () => setShowButtons(true),
-                    onTap: () => setShowButtons(false),
-                    // Move if highligted
-                    onPanUpdate: (details) {
-                      if (showButtons && stats.movable) {
-                        double dx = details.delta.dx;
-                        double dy = details.delta.dy;
-                        changeLoc(dx, dy);
-                        if (stats.onMove != null) {
-                          stats.onMove!(locx + dx, locy + dy);
-                        }
+                  ),
+                ),
+                onLongPress: () => setShowButtons(true),
+                onTap: () => setShowButtons(false),
+                // Move if highligted
+                onScaleStart: (details) {
+                  scale_start = mult;
+                  rot_start = rotation;
+                },
+                onDoubleTap: () {
+                  if (showButtons) {
+                    double r = roundRotation();
+                    changeRotation(r, false);
+                    if (stats.rotatable && stats.onRotate != null) {
+                      stats.onRotate!(r, false);
+                    }
+                  }
+                },
+                onScaleUpdate: (details) => scaleUpdate(details),
+              ),
+            ),
+            SizedBox(
+              width: StaticUtil.totalPadW,
+              height: StaticUtil.minH,
+              child: Stack(
+                children: [
+                  if (showButtons && stats.deletable)
+                    // Delete button
+                    StaticUtil.sideButton(Icons.delete, Colors.red, 0, 0, () {
+                      if (stats.deletable && stats.onDelete != null) {
+                        stats.onDelete!();
                       }
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: StaticUtil.totalPadW,
-                  height: StaticUtil.minH,
-                  child: Stack(
-                    children: [
-                      if (showButtons && stats.deletable)
-                        // Delete button
-                        StaticUtil.sideButton(Icons.delete, Colors.red, 0, 0,
-                            () {
-                          if (stats.deletable && stats.onDelete != null) {
-                            stats.onDelete!();
-                          }
-                        }),
-                      if (showButtons && stats.resizable)
-                        // Size up button
-                        StaticUtil.sideButton(
-                            Icons.arrow_circle_up,
-                            Colors.yellow,
-                            0,
-                            1 *
-                                (StaticUtil.iconSize +
-                                    (2 * StaticUtil.additionalPad)), () {
-                          if (stats.resizable) {
-                            double s = StaticUtil.sizeup_amn * basemult;
-                            if (mult + s > (10 * basemult)) {
-                              s = ((10 * basemult) - mult);
-                            }
-                            if (stats.onResize != null) {
-                              stats.onResize!(mult + s);
-                            }
-                            changeMult(s); //positive for scale up
+                    }),
+                  if (showButtons && stats.resizable)
+                    // Size up button
+                    StaticUtil.sideButton(
+                        Icons.arrow_circle_up,
+                        Colors.yellow,
+                        0,
+                        1 *
+                            (StaticUtil.iconSize +
+                                (2 * StaticUtil.additionalPad)), () {
+                      if (stats.resizable) {
+                        double s = StaticUtil.sizeup_amn * basemult;
+                        if (mult + s > (10 * basemult)) {
+                          s = ((10 * basemult) - mult);
+                        }
+                        if (stats.onResize != null) {
+                          stats.onResize!(mult + s);
+                        }
+                        changeMult(s); //positive for scale up
 
-                          }
-                        }),
-                      if (showButtons && stats.resizable)
-                        // Size down button
-                        StaticUtil.sideButton(
-                            Icons.arrow_circle_down,
-                            Colors.yellow,
-                            0,
-                            2 *
-                                (StaticUtil.iconSize +
-                                    (2 * StaticUtil.additionalPad)), () {
-                          if (stats.resizable) {
-                            double s = StaticUtil.sizeup_amn * basemult;
-                            if ((mult - s) < (.1 * basemult)) {
-                              s = (mult - (.1 * basemult));
-                            }
-                            if (stats.onResize != null) {
-                              stats.onResize!(mult - s);
-                            }
-                            changeMult(-s); //positive for scale up
+                      }
+                    }),
+                  if (showButtons && stats.resizable)
+                    // Size down button
+                    StaticUtil.sideButton(
+                        Icons.arrow_circle_down,
+                        Colors.yellow,
+                        0,
+                        2 *
+                            (StaticUtil.iconSize +
+                                (2 * StaticUtil.additionalPad)), () {
+                      if (stats.resizable) {
+                        double s = StaticUtil.sizeup_amn * basemult;
+                        if ((mult - s) < (.1 * basemult)) {
+                          s = (mult - (.1 * basemult));
+                        }
+                        if (stats.onResize != null) {
+                          stats.onResize!(mult - s);
+                        }
+                        changeMult(-s); //positive for scale up
 
-                          }
-                        }),
-                      if (showButtons && stats.rotatable)
-                        // Rotate up Button
-                        StaticUtil.sideButton(
-                            Icons.rotate_right,
-                            Colors.purple,
-                            0,
-                            3 *
-                                (StaticUtil.iconSize +
-                                    (2 * StaticUtil.additionalPad)), () {
-                          changeRotation(15);
-                          if (stats.rotatable && stats.onRotate != null) {
-                            stats.onRotate!(15);
-                          }
-                        }),
-                      if (showButtons && stats.rotatable)
-                        // Rotate down Button
-                        StaticUtil.sideButton(
-                            Icons.rotate_left,
-                            Colors.purple,
-                            0,
-                            4 *
-                                (StaticUtil.iconSize +
-                                    (2 * StaticUtil.additionalPad)), () {
-                          changeRotation(-15);
-                          if (stats.rotatable && stats.onRotate != null) {
-                            stats.onRotate!(-15);
-                          }
-                        }),
-                      if (showButtons && stats.layerShiftable)
-                        // Layer up Button
-                        StaticUtil.sideButton(
-                            Icons.keyboard_double_arrow_up,
-                            Colors.green,
-                            0,
-                            5 *
-                                (StaticUtil.iconSize +
-                                    (2 * StaticUtil.additionalPad)), () {
-                          if (stats.layerShiftable &&
-                              stats.onLayerShift != null) {
-                            stats.onLayerShift!(1);
-                          }
-                        }),
-                      if (showButtons && stats.layerShiftable)
-                        // Layer down Button
-                        StaticUtil.sideButton(
-                            Icons.keyboard_double_arrow_down,
-                            Colors.green,
-                            0,
-                            6 *
-                                (StaticUtil.iconSize +
-                                    (2 * StaticUtil.additionalPad)), () {
-                          if (stats.layerShiftable &&
-                              stats.onLayerShift != null) {
-                            stats.onLayerShift!(-1);
-                          }
-                        }),
-                    ],
-                  ),
-                ),
-              ],
-            )));
+                      }
+                    }),
+                  if (showButtons && stats.rotatable)
+                    // Rotate up Button
+                    StaticUtil.sideButton(
+                        Icons.rotate_right,
+                        Colors.purple,
+                        0,
+                        3 *
+                            (StaticUtil.iconSize +
+                                (2 * StaticUtil.additionalPad)), () {
+                      changeRotation(15, true);
+                      if (stats.rotatable && stats.onRotate != null) {
+                        stats.onRotate!(15, true);
+                      }
+                    }),
+                  if (showButtons && stats.rotatable)
+                    // Rotate down Button
+                    StaticUtil.sideButton(
+                        Icons.rotate_left,
+                        Colors.purple,
+                        0,
+                        4 *
+                            (StaticUtil.iconSize +
+                                (2 * StaticUtil.additionalPad)), () {
+                      changeRotation(-15, true);
+                      if (stats.rotatable && stats.onRotate != null) {
+                        stats.onRotate!(-15, true);
+                      }
+                    }),
+                  if (showButtons && stats.layerShiftable)
+                    // Layer up Button
+                    StaticUtil.sideButton(
+                        Icons.keyboard_double_arrow_up,
+                        Colors.green,
+                        0,
+                        5 *
+                            (StaticUtil.iconSize +
+                                (2 * StaticUtil.additionalPad)), () {
+                      if (stats.layerShiftable && stats.onLayerShift != null) {
+                        stats.onLayerShift!(1);
+                      }
+                    }),
+                  if (showButtons && stats.layerShiftable)
+                    // Layer down Button
+                    StaticUtil.sideButton(
+                        Icons.keyboard_double_arrow_down,
+                        Colors.green,
+                        0,
+                        6 *
+                            (StaticUtil.iconSize +
+                                (2 * StaticUtil.additionalPad)), () {
+                      if (stats.layerShiftable && stats.onLayerShift != null) {
+                        stats.onLayerShift!(-1);
+                      }
+                    }),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
